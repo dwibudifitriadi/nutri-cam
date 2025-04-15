@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRUTAL CAM CAPTURE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            line-height: 1.4;
+        }
+        
+        .brutal-container {
+            border: 6px solid #2b5876;
+            padding: 0;
+            background-color: #ffffff;
+            box-shadow: 12px 12px 0px #b3cde0;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        
+        .brutal-header {
+            background-color: #2b5876;
+            color: #ffffff;
+            padding: 25px;
+            border-bottom: 6px solid #b3cde0;
+            text-transform: uppercase;
+        }
+        
+        .brutal-body {
+            padding: 30px;
+            background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
+        }    
+        .brutal-section {
+            border-bottom: 3px solid #88d8b0;
+            padding: 20px 0;
+            margin-bottom: 25px;
+        }
+        .brutal-title {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #2b5876;
+            border-left: 6px solid #ff6b6b;
+            padding-left: 15px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }    
+        .brutal-btn {
+            background-color: #2b5876;
+            color: #fff;
+            border: 3px solid #88d8b0;
+            padding: 10px 25px;
+            margin: 5px;
+            transition: all 0.2s;
+            font-weight: bold;
+            border-radius: 0%;
+            text-transform: uppercase;
+        }
+        .brutal-btn:hover {
+            background-color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+        .brutal-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+        }
+        .brutal-input {
+            border: 3px solid #000;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            background-color: #fff;
+        }
+        .brutal-input:focus {
+            outline: none;
+            background-color: #ffffcc;
+        }
+        
+        .webcam-container {
+            width: 100%;
+            height: 400px;
+            background-color: #000;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #webcam-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #webcam-canvas {
+            display: none;
+        }
+        
+        .brutal-alert {
+            border: 3px solid #000;
+            padding: 15px;
+            background-color: #ffff00;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .brutal-footer {
+            background-color: #2b5876;
+            color: #ffffff;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9em;
+            border-top: 6px solid #b3cde0;
+        }
+        
+        .brutal-file-input {
+            display: none;
+            visibility: none;
+        }
+        
+        .capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            border: 5px solid #000;
+            cursor: pointer;
+        }
+        
+        .capture-btn:hover {
+            background-color: #cc0000;
+        }
+        @media (max-width: 768px) {
+            .brutal-container {
+                border-width: 4px;
+                box-shadow: 8px 8px 0px #b3cde0;
+            }
+
+            .brutal-header {
+                padding: 15px;
+            }
+
+            .brutal-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container brutal-container">
+        <div class="brutal-header">
+            <h1>BRUTAL CAM CAPTURE</h1>
+        </div>
+        
+        <div class="brutal-body">
+            <div class="brutal-alert" id="alert-box" style="display: none;">
+                ALERT: THIS IS AN ALERT MESSAGE!
+            </div>
+            
+            <form id="capture-form">
+                <div class="mb-3">
+                    <input type="file" id="file-input" class="form-control brutal-input brutal-file-input" accept="image/*" capture="environment">
+                    <center>
+
+                        <button type="button" id="open-cam-btn" class="btn brutal-btn">OPEN CAMERA</button>
+                    </center>
+                </div>
+                
+                <div class="webcam-container" id="webcam-container" style="display: none;">
+                    <video id="webcam-video" autoplay playsinline></video>
+                    <canvas id="webcam-canvas"></canvas>
+                    <div class="capture-btn" id="capture-btn"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <button type="submit" class="btn brutal-btn" id="submit-btn" disabled>SUBMIT</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="brutal-footer">
+            BRUTAL DESIGN © 2023 | NO RIGHTS RESERVED
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file-input');
+            const openCamBtn = document.getElementById('open-cam-btn');
+            const webcamContainer = document.getElementById('webcam-container');
+            const videoElement = document.getElementById('webcam-video');
+            const canvasElement = document.getElementById('webcam-canvas');
+            const captureBtn = document.getElementById('capture-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const alertBox = document.getElementById('alert-box');
+            
+            let stream = null;
+            
+            // Open camera button click handler
+            openCamBtn.addEventListener('click', async function() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        },
+                        audio: false
+                    });
+                    
+                    videoElement.srcObject = stream;
+                    webcamContainer.style.display = 'block';
+                    showAlert('CAMERA ACTIVATED. READY TO CAPTURE.');
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    showAlert('ERROR: CAMERA ACCESS DENIED!');
+                }
+            });
+            
+            // Capture button click handler
+            captureBtn.addEventListener('click', function() {
+                if (!stream) return;
+                
+                // Set canvas dimensions to match video
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+                
+                // Draw current video frame to canvas
+                const context = canvasElement.getContext('2d');
+                context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                
+                // Convert canvas to blob and create File object
+                canvasElement.toBlob(function(blob) {
+                    const file = new File([blob], 'capture_' + new Date().getTime() + '.jpg', {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    
+                    // Create a DataTransfer object to simulate file input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    
+                    // Enable submit button
+                    submitBtn.disabled = false;
+                    
+                    showAlert('IMAGE CAPTURED! READY TO SUBMIT.');
+                }, 'image/jpeg', 0.9);
+            });
+            
+            // Form submit handler
+            document.getElementById('capture-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    showAlert('ERROR: NO FILE SELECTED!');
+                    return;
+                }
+                
+                // Here you would typically handle the file upload
+                // For this demo, we'll just show a success message
+                showAlert('SUBMISSION SUCCESSFUL! FILE READY FOR PROCESSING.');
+                
+                // Reset form
+                resetForm();
+            });
+            
+            // Show alert message
+            function showAlert(message) {
+                alertBox.textContent = message;
+                alertBox.style.display = 'block';
+                
+                // Hide alert after 5 seconds
+                setTimeout(function() {
+                    alertBox.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Reset form
+            function resetForm() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+                
+                videoElement.srcObject = null;
+                webcamContainer.style.display = 'none';
+                fileInput.value = '';
+                submitBtn.disabled = true;
+            }
+            
+            // Clean up when leaving page
+            window.addEventListener('beforeunload', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            });
+        });
+    </script>
+</body>
+</html>
